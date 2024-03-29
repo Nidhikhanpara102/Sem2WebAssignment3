@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Assignment3_Nidhi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0b8be301db9455ae17c12285981f247b14f4dade")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5831d82147eef2135fad6e082445019d145b0a76")]
 [assembly: System.Reflection.AssemblyProductAttribute("Assignment3_Nidhi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Assignment3_Nidhi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

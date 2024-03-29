@@ -85,5 +85,24 @@ namespace Assignment3_Nidhi.Controllers
             return Ok("Comment updated successfully");
         }
 
+        // DELETE: api/Comments/5
+        [HttpDelete("{id}")]
+        public ActionResult<Comments> DeleteComments(int id)
+        {
+            var comments = _context.Comments.Find(id);
+            if (comments == null)
+            {
+                return NotFound("Comment not found");
+            }
+
+            _context.Comments.Remove(comments);
+            _context.SaveChanges();
+
+            var successMessage = $"Comment with id {id} has been deleted successfully";
+
+            return Ok(successMessage);
+        }
+
+
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Assignment3_Nidhi.Entities;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace Assignment3_Nidhi.Controllers
 {
@@ -20,22 +21,20 @@ namespace Assignment3_Nidhi.Controllers
         [HttpPost]
         public ActionResult<Cart> PostCart(Cart cart)
         {
-            try
+            var product = _context.Products.Find(cart.ProductId);
+            if (product == null)
             {
-                _context.Carts.Add(cart);
-                _context.SaveChanges();
-
-                var successMessage = "Item added to the cart successfully";
-
-                return CreatedAtAction(nameof(GetCart), new { id = cart.CartId }, new { cart, message = successMessage });
+                return BadRequest("Invalid ProductId");
             }
-            catch (Exception ex)
-            {
-                var errorMessage = "An error occurred while adding the item to cart";
-                Console.WriteLine($"Error occurred: {ex.Message}");
-                return BadRequest(errorMessage);
-            }
+
+            _context.Carts.Add(cart);
+            _context.SaveChanges();
+            var successMessage = "Item added to the cart successfully";
+
+            return CreatedAtAction(nameof(GetCart), new { id = cart.CartId }, new { cart, Message = successMessage });
         }
+
+
 
         // GET: api/Cart/5
         [HttpGet("{id}")]
