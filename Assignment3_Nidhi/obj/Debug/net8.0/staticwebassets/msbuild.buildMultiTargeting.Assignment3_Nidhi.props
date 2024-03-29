@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\Assignment3_Nidhi.props" />
+</Project>
