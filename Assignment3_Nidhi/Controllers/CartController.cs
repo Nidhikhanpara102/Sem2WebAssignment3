@@ -16,12 +16,25 @@ namespace Assignment3_Nidhi.Controllers
         {
             _context = context;
         }
-
-        // GET: api/Cart
-        [HttpGet]
-        public ActionResult<IEnumerable<Cart>> GetCarts()
+        // POST: api/Cart
+        [HttpPost]
+        public ActionResult<Cart> PostCart(Cart cart)
         {
-            return _context.Carts.ToList();
+            try
+            {
+                _context.Carts.Add(cart);
+                _context.SaveChanges();
+
+                var successMessage = "Item added to the cart successfully";
+
+                return CreatedAtAction(nameof(GetCart), new { id = cart.CartId }, new { cart, message = successMessage });
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = "An error occurred while adding the item to cart";
+                Console.WriteLine($"Error occurred: {ex.Message}");
+                return BadRequest(errorMessage);
+            }
         }
 
         // GET: api/Cart/5
@@ -32,36 +45,53 @@ namespace Assignment3_Nidhi.Controllers
 
             if (cart == null)
             {
-                return NotFound();
+                return NotFound("Cart Item id not found");
             }
 
             return cart;
         }
 
-        // POST: api/Cart
-        [HttpPost]
-        public ActionResult<Cart> PostCart(Cart cart)
-        {
-            _context.Carts.Add(cart);
-            _context.SaveChanges();
-
-            return CreatedAtAction(nameof(GetCart), new { id = cart.CartId }, cart);
-        }
 
         // PUT: api/Cart/5
         [HttpPut("{id}")]
         public IActionResult PutCart(int id, Cart cart)
         {
-            if (id != cart.CartId)
+            try
             {
-                return BadRequest();
+                if (id != cart.CartId)
+                {
+                    var errorMessage = "Invalid Cart ID";
+                    return BadRequest(errorMessage);
+                }
+
+                _context.Entry(cart).State = EntityState.Modified;
+                _context.SaveChanges();
+
+                var successMessage = "Cart updated successfully";
+                return Ok(new { message = successMessage });
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = "An error occurred while updating the cart";
+                Console.WriteLine($"Error occurred: {ex.Message}");
+                return BadRequest(errorMessage);
+            }
+        }
+        // GET: api/Cart
+        [HttpGet]
+        public ActionResult<IEnumerable<Cart>> GetCarts()
+        {
+            var carts = _context.Carts.ToList();
+
+            if (carts.Count == 0)
+            {
+                var errorMessage = "Cart is empty";
+                return NotFound(errorMessage);
             }
 
-            _context.Entry(cart).State = EntityState.Modified;
-            _context.SaveChanges();
-
-            return NoContent();
+            return carts;
         }
+
 
         // DELETE: api/Cart/5
         [HttpDelete("{id}")]
@@ -70,13 +100,16 @@ namespace Assignment3_Nidhi.Controllers
             var cart = _context.Carts.Find(id);
             if (cart == null)
             {
-                return NotFound();
+                var errorMessage = $"Cart with ID {id} not found";
+                return NotFound(errorMessage);
             }
 
             _context.Carts.Remove(cart);
             _context.SaveChanges();
 
-            return cart;
+            var successMessage = $"Cart with ID {id} has been deleted successfully";
+            return Ok(new { message = successMessage, cart });
         }
+
     }
 }
