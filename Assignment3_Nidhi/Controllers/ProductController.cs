@@ -32,7 +32,12 @@ namespace Assignment3_Nidhi.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Product>> GetProducts()
         {
-            return _context.Products.ToList();
+            var products = _context.Products.ToList();
+            if (products.Count == 0)
+            {
+                return NotFound("No products found");
+            }
+            return products;
         }
 
         // GET: api/Product/5
@@ -43,7 +48,7 @@ namespace Assignment3_Nidhi.Controllers
 
             if (product == null)
             {
-                return NotFound();
+                return NotFound("Product not found");
             }
 
             return product;
@@ -56,13 +61,14 @@ namespace Assignment3_Nidhi.Controllers
         {
             if (id != product.ProductId)
             {
-                return BadRequest();
+                return BadRequest("Invalid product ID");
             }
 
             _context.Entry(product).State = EntityState.Modified;
             _context.SaveChanges();
 
-            return NoContent();
+            var successMessage = "Product updated successfully";
+            return Ok(successMessage);
         }
 
         // DELETE: api/Product/5
@@ -78,7 +84,10 @@ namespace Assignment3_Nidhi.Controllers
             _context.Products.Remove(product);
             _context.SaveChanges();
 
-            return product;
+            var successMessage = $"Product with ID {id} has been deleted successfully";
+            return Ok(new { message = successMessage, product });
+
+        
         }
     }
 }

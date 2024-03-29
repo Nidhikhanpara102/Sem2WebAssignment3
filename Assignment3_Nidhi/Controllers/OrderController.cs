@@ -21,7 +21,15 @@ namespace Assignment3_Nidhi.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Order>> GetOrders()
         {
-            return _context.Orders.ToList();
+            var orders = _context.Orders.ToList();
+
+            if (orders.Count == 0)
+            {
+                var errorMessage = "No orders found";
+                return NotFound(errorMessage);
+            }
+
+            return orders;
         }
 
         // GET: api/Order/5
@@ -32,7 +40,7 @@ namespace Assignment3_Nidhi.Controllers
 
             if (order == null)
             {
-                return NotFound();
+                return NotFound("Order Id does not found");
             }
 
             return order;
@@ -40,13 +48,23 @@ namespace Assignment3_Nidhi.Controllers
 
         // POST: api/Order
         [HttpPost]
-        public ActionResult<Order> PostOrder(Order order)
+        public ActionResult<object> PostOrder(Order order)
         {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                                .Select(e => e.ErrorMessage)
+                                                .ToList();
+                return BadRequest(errors);
+            }
+
             _context.Orders.Add(order);
             _context.SaveChanges();
 
-            return CreatedAtAction(nameof(GetOrder), new { id = order.OrderId }, order);
+            var successMessage = "Order created successfully";
+            return CreatedAtAction(nameof(GetOrder), new { id = order.OrderId }, new { Order = order, Message = successMessage });
         }
+
 
         // PUT: api/Order/5
         [HttpPut("{id}")]
@@ -54,14 +72,31 @@ namespace Assignment3_Nidhi.Controllers
         {
             if (id != order.OrderId)
             {
-                return BadRequest();
+                var errorMessage = "Invalid order ID";
+                return BadRequest(errorMessage);
             }
 
             _context.Entry(order).State = EntityState.Modified;
-            _context.SaveChanges();
 
-            return NoContent();
+            if (!_context.Orders.Any(o => o.OrderId == id))
+            {
+                var errorMessage = $"Order with ID {id} not found";
+                return NotFound(errorMessage);
+            }
+
+            try
+            {
+                _context.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw;
+            }
+
+            var successMessage = "Order updated successfully";
+            return Ok(successMessage);
         }
+
 
         // DELETE: api/Order/5
         [HttpDelete("{id}")]
@@ -70,13 +105,15 @@ namespace Assignment3_Nidhi.Controllers
             var order = _context.Orders.Find(id);
             if (order == null)
             {
-                return NotFound();
+                var errorMessage = $"Order with ID {id} not found";
+                return NotFound(errorMessage);
             }
 
             _context.Orders.Remove(order);
             _context.SaveChanges();
 
-            return order;
+            var successMessage = $"Order with ID {id} has been deleted successfully";
+            return Ok(new { message = successMessage, order });
         }
     }
 }

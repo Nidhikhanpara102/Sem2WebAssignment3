@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Assignment3_Nidhi.Entities;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace Assignment3_Nidhi.Controllers
 {
@@ -22,7 +23,12 @@ namespace Assignment3_Nidhi.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<User>> GetUsers()
         {
-            return _context.Users.ToList();
+            var users = _context.Users.ToList();
+            if (users.Count == 0)
+            {
+                return NotFound("No users found");
+            }
+            return users;
         }
 
         // GET: api/User/5
@@ -43,11 +49,19 @@ namespace Assignment3_Nidhi.Controllers
         [HttpPost]
         public ActionResult<User> PostUser(User user)
         {
+            if (user == null)
+            {
+                return BadRequest("Invalid user data");
+            }
+
             _context.Users.Add(user);
             _context.SaveChanges();
 
-            return CreatedAtAction(nameof(GetUser), new { id = user.UserId }, user);
+            var successMessage = "User created successfully";
+
+            return CreatedAtAction(nameof(GetUser), new { id = user.UserId }, new { user, message = successMessage } );
         }
+
 
         // PUT: api/User/5
         [HttpPut("{id}")]
@@ -55,14 +69,22 @@ namespace Assignment3_Nidhi.Controllers
         {
             if (id != user.UserId)
             {
-                return BadRequest();
+                return BadRequest("Invalid user ID");
             }
 
-            _context.Entry(user).State = EntityState.Modified;
+            var existingUser = _context.Users.Find(id);
+            if (existingUser == null)
+            {
+                return NotFound("User not found");
+            }
+
+            _context.Entry(existingUser).CurrentValues.SetValues(user);
             _context.SaveChanges();
 
-            return NoContent();
+            return Ok("User updated successfully");
+
         }
+
 
         // DELETE: api/User/5
         [HttpDelete("{id}")]
@@ -77,7 +99,7 @@ namespace Assignment3_Nidhi.Controllers
             _context.Users.Remove(user);
             _context.SaveChanges();
 
-            return user;
+            return Ok($"User with ID {id} has been successfully deleted");
         }
     }
 }
